@@ -11,7 +11,7 @@
     <div class="container mt-4 mb-5">
 
         <h1 class="mb-1">Library Portal</h1>
-        <p class="text-muted mb-3">Prepared by: Khaliq Meshaal B. Aguilar</p>
+        <p class="text-muted mb-3">Prepared by: Danielle John T. Lopez</p>
 
         @include('partials._nav')
 
