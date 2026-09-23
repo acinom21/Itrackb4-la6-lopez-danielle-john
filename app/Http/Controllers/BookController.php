@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-        private function books()
+    private function books()
     {
         return [
             1 => ['id' => 1, 'title' => 'The Lord of the Rings', 'author' => 'J.R.R. Tolkien', 'year' => '1950', 'genre' => 'Classical'],
@@ -19,9 +19,28 @@ class BookController extends Controller
         ];
     }
 
-    public function index()
+    // A1/A2/A3/A4/A5/A6: one route, two query-string values, each with a
+    // sensible default (''), applied independently and together.
+    public function index(Request $request)
     {
-        return view('books.index', ['books' => $this->books()]);
+        $genre = $request->query('genre', '');
+        $year  = $request->query('year', '');
+
+        $all = collect($this->books());
+
+        $books = $all
+            ->when($genre !== '', fn ($list) => $list->where('genre', $genre))
+            ->when($year !== '', fn ($list) => $list->where('year', $year))
+            ->values();
+
+        return view('books.index', [
+            'books'  => $books,
+            'genre'  => $genre,
+            'year'   => $year,
+            // for building the filter links in the view (B1)
+            'genres' => $all->pluck('genre')->unique()->sort()->values(),
+            'years'  => $all->pluck('year')->unique()->sort()->values(),
+        ]);
     }
 
     public function create()
@@ -38,8 +57,7 @@ class BookController extends Controller
     {
         $books = $this->books();
 
-        if (!isset($books[$id]))
-        {
+        if (!isset($books[$id])) {
             abort(404);
         }
 
@@ -68,23 +86,11 @@ class BookController extends Controller
         return view('books.feature', ['book' => $books[1]]);
     }
 
-    public function filter(?string $genre = null)
+    // C2/C3/C4: replaces the old filter() method. Renders nothing itself —
+    // carries the old genre value across and redirects into the new
+    // query-string version of the list.
+    public function redirectOldFilter(?string $genre = null)
     {
-        $books = $this->books();
-
-        if ($genre) {
-            $books = array_filter($books, fn($b) =>
-                $b['title'] == $genre ||
-                $b['author'] == $genre ||
-                $b['genre'] == $genre ||
-                $b['year'] == $genre,
-            );
-        }
-
-        return view('books.filter', [
-            'books' => $books,
-            'activeFilter' => $genre,
-        ]);
+        return redirect()->route('books.index', $genre ? ['genre' => $genre] : []);
     }
-
 }

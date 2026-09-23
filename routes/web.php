@@ -7,7 +7,9 @@ use App\Http\Controllers\BookController;
 Route::get('/books/feature', [BookController::class, 'feature'])
     ->name('books.feature');
 
-Route::get('/books/filter/{genre?}', [BookController::class, 'filter'])
+// C1: kept so old bookmarks to /books/filter/{genre} don't 404.
+// It no longer has its own view — it only redirects into books.index.
+Route::get('/books/filter/{genre?}', [BookController::class, 'redirectOldFilter'])
     ->name('books.filter');
 
 Route::resource('books', BookController::class)
